@@ -3,15 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
 
     <title>Carrinho de Compras</title>
 
     <!-- Scripts -->
-
+    <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="https://unpkg.com/ionicons@5.0.0/dist/ionicons.js"></script>
 
     <!-- Fonts -->
@@ -19,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
     <!-- Styles -->
-
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 
 <body>
@@ -67,11 +68,11 @@
                                 </a>
 
                                 <form id="logout-form" action="" method="POST" style="display: none;">
-                                   @csrf
+                                    @csrf
                                 </form>
                             </div>
                         </li>
-                     @endguest
+                        @endguest
                     </ul>
                 </div>
             </div>
@@ -83,4 +84,5 @@
         @stack('scripts')
     </div>
 </body>
+
 </html>
