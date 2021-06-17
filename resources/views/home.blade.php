@@ -8,12 +8,11 @@
                 <div class="card-header">Painel de Controle</div>
 
                 <div class="card-body">
-
-                       <div class="alert alert-success" role="alert">
-
-                       </div>
-
-
+                    @if (session('status'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('status') }}
+                    </div>
+                    @endif
                     Loja Virtual
                 </div>
             </div>
@@ -28,11 +27,11 @@
                     <div class="card-header">{{$produto->nome}}</div>
 
                     <div class="card-body">
-
-                           <div class="alert alert-success" role="alert">
-
-                           </div>
-
+                        @if (session('status'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('status') }}
+                        </div>
+                        @endif
                         <h5>{{$produto->descricao}}</h5>
                         <br>
                         <h5>{{$produto->valor}}</h5>
