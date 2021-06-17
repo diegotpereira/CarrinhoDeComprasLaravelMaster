@@ -23,10 +23,11 @@
 </div>
 
 <div class="container text-center">
-    <form action="#" method="POST">
+    <form action="{{route('carrinho.adicionar')}}" method="POST">
         <input type="hidden" name="id" value="{{$produto->id}}">
-        <button type="submit" class="btn btn-primary">Adicionar ao Carrinho</button>
+        <button type="submit" class="btn btn-primary">Adicionar ao Carrinho<button>
     </form>
 </div>
 @endif
+
 @endsection
