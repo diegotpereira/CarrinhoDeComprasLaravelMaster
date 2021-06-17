@@ -20,12 +20,12 @@
         </div>
     </div>
     <hr>
-
-    <a href="">
+    @foreach($produtos as $produto)
+    <a href="{{route('home.show', $produto->id)}}">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header"></div>
+                    <div class="card-header">{{$produto->nome}}</div>
 
                     <div class="card-body">
 
@@ -33,15 +33,15 @@
 
                            </div>
 
-                        <h5></h5>
+                        <h5>{{$produto->descricao}}</h5>
                         <br>
-                        <h5></h5>
+                        <h5>{{$produto->valor}}</h5>
                     </div>
                 </div>
             </div>
         </div>
     </a>
     <hr>
-
+    @endforeach
 </div>
 @endsection

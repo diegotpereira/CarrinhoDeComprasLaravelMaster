@@ -21,4 +21,4 @@ use Illuminate\Support\Facades\Route;
 //Rotas da loja
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', 'HomeController@index')->name('home');
-
+Route::get('/{id}/show', 'HomeController@show')->name('home.show');

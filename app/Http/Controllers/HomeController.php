@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Produto;
 
 class HomeController extends Controller
 {
@@ -14,8 +15,10 @@ class HomeController extends Controller
     public function index()
     {
         //
-
-        return view('home');
+        $produtos = Produto::paginate();
+        return view('home', [
+            'produtos' => $produtos
+        ]);
     }
 
     /**
@@ -48,6 +51,15 @@ class HomeController extends Controller
     public function show($id)
     {
         //
+        $produtos = Produto::where('id', $id)->first();
+
+        if (!$produtos) {
+            # code...
+            return redirect()->back();
+        }
+        return view('mostrarProduto', [
+            'produto' => $produtos
+        ]);
     }
 
     /**
