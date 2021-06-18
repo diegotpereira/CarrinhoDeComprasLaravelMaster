@@ -74,7 +74,7 @@
     </form>
 </div>
 
-
+@empty
 <hr>
 <h1>Carrinho Vazio</h1>
 
@@ -91,13 +91,13 @@
     <input type="hidden" name="item">
 </form>
 
-<form action="" method="POST" id="form-adicionar-produto">
+<form action="{{ route('carrinho.adicionar') }}" method="POST" id="form-adicionar-produto">
     @csrf
     <input type="hidden" name="id">
 </form>
 
 @push('scripts')
-<script type="text/javascript" src=""></script>
+    <script type="text/javascript" src="{{ asset('js/carrinho.js') }}" ></script>
 @endpush
 
 @endsection

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Produto;
 use Illuminate\Support\Carbon;
+
 class ProdutosSeeder extends Seeder
 {
     /**
@@ -14,7 +15,6 @@ class ProdutosSeeder extends Seeder
      */
     public function run()
     {
-        //
         Produto::insert([
             [
                 'nome'  => 'Sabao em Po',
@@ -54,4 +54,5 @@ class ProdutosSeeder extends Seeder
             ]
         ]);
     }
+    
 }

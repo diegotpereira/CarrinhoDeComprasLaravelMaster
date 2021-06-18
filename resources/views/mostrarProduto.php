@@ -3,6 +3,7 @@
 @section('content')
 
 @if(@isset($produto))
+
 <div class="container">
     <table class="table">
         <thead>
