@@ -99,6 +99,81 @@ class CarrinhoController extends Controller
         return redirect()->route('carrinho.index')->with('mensagem', 'Produto adicionado com sucesso!.');
     }
 
+    public function compras(){
+        $compras = $this->repositoryPedido->where([
+            'status' => 'PA',
+            'user_id' => Auth::id()
+        ])->orderBy('created_at', 'desc')->get();
+
+        $cancelados = $this->repositoryPedido->where([
+            'status' => 'CA',
+            'user_id' => Auth::id()
+        ])->orderBy('created_at', 'desc')->get();
+
+        return view('carrinho.compras', [
+            'compras' => $compras,
+            'cancelados' => $cancelados
+        ]);
+    }
+
+    public function cancelar(Request $request){
+        $idPedido = $request->input('pedido_id');
+        $idItens_pedido =  $request->input('id');
+        $idUsuario = Auth::id();
+
+        if (empty($idItens_pedido)) {
+            # code...
+            return redirect()->route('carrinho.compras')->with('mensagem', 'Nenhum item selecionados!.');
+        }
+
+        $check_pedido = $this->repositoryPedido->where([
+            'id' => $idPedido,
+            'usur_id' => $idUsuario,
+            'status' => 'PA'
+        ])->exists();
+
+        if (!$check_pedido) {
+            # code...
+            return redirect()->route('carrinho.compras')->with('mensagem', 'Pedido não encontrado!.');
+        }
+
+        $check_Produtos = $this->repositoryItensPedido->where([
+            'pedido_id' => $idPedido,
+            'status' => 'PA'
+        ])->whereIn('id', $idItens_pedido)->exists();
+
+        if (!$check_Produtos) {
+            # code...
+            return redirect()->route('carrinho.compras')->with('mensagem', 'Produto não encontrado!.');
+        }
+
+        $this->repositoryItensPedido->where([
+            'pedido_id' => $idPedido,
+            'status' => 'PA'
+        ])->whereIn('id', $idItens_pedido)->update([
+            'status' => 'CA'
+        ]);
+        $check_pedido_cancel = $this->repositoryItensPedido->where([
+            'pedido_id' => $idPedido,
+            'status' => 'PA'
+        ])->exists();
+
+        if (!$check_pedido_cancel) {
+            # code...
+            $this->repositoryPedido->where([
+                'id' => $idPedido
+            ])->update([
+                'status' => 'CA'
+            ]);
+
+            $mensagem = 'Compra cancelada pelo usuário com sucesso!.';
+        } else {
+            # code...
+
+            $mensagem = 'Produto cancelado com sucesso!.';
+        }
+        
+    }
 
     /**
      * Display the specified resource.
