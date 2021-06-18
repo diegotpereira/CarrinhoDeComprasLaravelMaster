@@ -3,9 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Pedido;
+use App\Models\Produto;
+use App\Models\ItensPedido;
+use App\Models\CupomDesconto;
+use Illuminate\Support\Facades\Auth;
 
 class CarrinhoController extends Controller
 {
+
+    protected $repositoryPedido;
+    protected $repositoryProduto;
+    protected $repositoryItensPedido;
+    protected $repositoryCupom;
+
+    public function __construct(Request $request, Pedido $pedido, Produto $produto, ItensPedido $itensPedido, CupomDesconto $cupom){
+        $this->request = $request;
+        $this->repositoryPedido = $pedido;
+        $this->repositoryProduto = $produto;
+        $this->repositoryItensPedido = $itensPedido;
+        $this->repositoryCupom = $cupom;
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +34,13 @@ class CarrinhoController extends Controller
     public function index()
     {
         //
-        return view('carrinho.index');
+        $pedidos = Pedido::where([
+            'status' => 'RE',
+            'user_id' => Auth::id()
+        ])->get();
+        return view('carrinho.index', [
+            'pedidos' => $pedidos,
+        ]);
     }
 
     /**
@@ -33,10 +59,46 @@ class CarrinhoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function adicionar(Request $request)
     {
         //
+        $idProduto = $request->only('id');
+
+        $produto = $this->repositoryProduto->where('id', $idProduto)->first();
+
+        if (empty($produto->id)) {
+            # code...
+            $mensagem = 'Produto não encontrado!.';
+            $produtos = $this->repositoryProduto->paginate();
+
+            return view('home', [
+                'produtos' => $produtos,
+                'mensagem' => $mensagem
+            ]);
+        }
+        $idUsuario = Auth::id();
+
+        $idPedido = $this->repositoryPedido->buscarPedido([
+            'user_id' => $idUsuario,
+            'status' => 'RE'
+        ]);
+        if (!$idPedido) {
+            # code...
+            $Pedido_novo = Pedido::create([
+                'user_id' => $idUsuario,
+                'status' => 'RE'
+            ]);
+            $idPedido = $Pedido_novo->id;
+        }
+        $this->repositoryItensPedido->create([
+            'pedido_id' => $idPedido,
+            'produto_id' => $produto->id,
+            'status'=> 'RE',
+            'valor' => $produto->valor
+        ]);
+        return redirect()->route('carrinho.index')->with('mensagem', 'Produto adicionado com sucesso!.');
     }
+
 
     /**
      * Display the specified resource.
