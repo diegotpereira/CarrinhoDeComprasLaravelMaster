@@ -99,6 +99,32 @@ class CarrinhoController extends Controller
         return redirect()->route('carrinho.index')->with('mensagem', 'Produto adicionado com sucesso!.');
     }
 
+    public function concluir(Request $request){
+        $idPedido = $request->input('pedido_id');
+        $idUsuario = Auth::id();
+
+        $check_pedido = $this->repositoryPedido->where([
+            'id' => $idPedido,
+            'user_id' => $idUsuario,
+            'status' => 'RE'
+        ]);
+
+        if (!$check_pedido) {
+            # code...
+            return redirect()->rote('carrinho.index')->with('mensagem', 'Pedido não encontrado!.');
+        }
+        $check_produto = $this->repositoryItensPedido->where([
+            'pedido_id' => $idPedido
+        ])->exists();
+        if (!$check_produto) {
+            # code...
+            return redirect()->route('carrinho.index')->with('mensagem', 'Produto não encontrado!.');
+        }
+        $this->repositoryPedido->where([
+            'pedido_id' => $idPedido
+        ])->
+    }
+
 
     /**
      * Display the specified resource.
