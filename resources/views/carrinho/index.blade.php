@@ -32,22 +32,19 @@
             $total_pedido = 0;
             @endphp
 
-            @foreach($pedido->itens_pedidos as $itens_Pedido)
+            @foreach($pedido->itens_pedidos as $itens_pedido)
             <tr>
                 <td>
-                    <a href="#" onclick="">
-                        <ion-icon name="remove-circle-outline"></ion-icon>
-                    </a>
-                    {{$itens_Pedido->qtd}}
-                    <a href="#" onclick="carrinhoAdicionarProduto({{$itens_Pedido->produto_id}})">
-                        <ion-icon name="add-circle-outline"></ion-icon>
-                    </a>
+                <a href="#" onclick="carrinhoRemoverProduto({{$pedido->id}},{{$itens_pedido->produto_id}},1)"><ion-icon name="remove-circle-outline"></ion-icon></a>
+                    {{$itens_pedido->qtd}}
+                    <a href="#" onclick="carrinhoAdicionarProduto({{$itens_pedido->produto_id}})"><ion-icon name="add-circle-outline"></ion-icon></a>                    
+                    <a href="#" onclick="carrinhoRemoverProduto({{$pedido->id}},{{$itens_pedido->produto_id}},0)">Remover Produto</a>
                 </td>
-                <td>{{itens_Pedido->produto->nome}}</td>
-                <td>R$: {{number_format($itens_Pedido->produto->valor,2,',','.')}}</td>
-                <td>R$: {{number_format($itens_Pedido->descontos,2,',','.')}}</td>
+                <td>{{$itens_pedido->produto->nome}}</td>
+                <td>R$: {{number_format($itens_pedido->produto->valor,2,',','.')}}</td>
+                <td>R$: {{number_format($itens_pedido->descontos,2,',','.')}}</td>
                 @php
-                $total_produto = $itens_Pedido->valores - $itens_Pedido->descontos;
+                $total_produto = $itens_pedido->valores - $itens_pedido->descontos;
                 $total_pedido += $total_produto;
                 @endphp
                 <td>R$: {{number_format($total_produto,2,',','.')}}</td>
@@ -59,7 +56,7 @@
 <div class="container text-center">
     <h1>Valor total da compra: R$: {{number_format($total_pedido,2,',','.')}}</h1>
     <br>
-    <form action="" method="POST">
+    <form action="{{route('carrinho.desconto')}}" method="POST">
         @csrf
         <input type="hidden" name="pedido_id" value="{{$pedido->id}}">
         <label for="cupom">Digite o cupom:</label>
@@ -67,7 +64,7 @@
         <button type="submit" class="btn btn-primary">Aplicar Cupom</button>
     </form>
 
-    <form action="" method="POST">
+    <form action="{{route('carrinho.concluir')}}" method="POST">
         @csrf
         <input type="hidden" name="pedido_id" value="{{$pedido->id}}">
         <button type="submit" class="btn btn-primary">Concluir Compra</button>
@@ -77,13 +74,13 @@
 @empty
 <hr>
 <h1>Carrinho Vazio</h1>
-
+@endforelse
 <hr>
 <div class="container">
     <a href="{{route('home')}}" class="btn btn-primary">Continuar Comprando</a>
 </div>
 
-<form action="" method="POST" id="form-remover-produto">
+<form action="{{route('carrinho.remover')}}" method="POST" id="form-remover-produto">
     @csrf
     @method('DELETE')
     <input type="hidden" name="pedido_id">

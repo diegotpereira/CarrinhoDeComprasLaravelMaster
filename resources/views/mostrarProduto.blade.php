@@ -24,9 +24,10 @@
 </div>
 
 <div class="container text-center">
-    <form action="{{route('carrinho.adicionar')}}" method="POST">
+    <form action="{{route('carrinho.adicionar')}}" method="post" >
+        @csrf
         <input type="hidden" name="id" value="{{$produto->id}}">
-        <button type="submit" class="btn btn-primary">Adicionar ao Carrinho<button>
+        <button type="submit" class="btn btn-primary">Adicionar ao carrinho</button>
     </form>
 </div>
 @endif

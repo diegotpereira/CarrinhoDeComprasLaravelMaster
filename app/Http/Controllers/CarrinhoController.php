@@ -43,22 +43,6 @@ class CarrinhoController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function adicionar(Request $request)
     {
         //
@@ -93,13 +77,13 @@ class CarrinhoController extends Controller
         $this->repositoryItensPedido->create([
             'pedido_id' => $idPedido,
             'produto_id' => $produto->id,
+            'desconto' => 'null',
             'status'=> 'RE',
             'valor' => $produto->valor
         ]);
         return redirect()->route('carrinho.index')->with('mensagem', 'Produto adicionado com sucesso!.');
     }
 
-<<<<<<< HEAD
     public function concluir(Request $request){
         $idPedido = $request->input('pedido_id');
         $idUsuario = Auth::id();
@@ -112,7 +96,7 @@ class CarrinhoController extends Controller
 
         if (!$check_pedido) {
             # code...
-            return redirect()->rote('carrinho.index')->with('mensagem', 'Pedido não encontrado!.');
+            return redirect()->route('carrinho.index')->with('mensagem', 'Pedido não encontrado!.');
         }
         $check_produto = $this->repositoryItensPedido->where([
             'pedido_id' => $idPedido
@@ -121,9 +105,19 @@ class CarrinhoController extends Controller
             # code...
             return redirect()->route('carrinho.index')->with('mensagem', 'Produto não encontrado!.');
         }
-        $this->repositoryPedido->where([
+        $this->repositoryItensPedido->where([
             'pedido_id' => $idPedido
-        ])->
+        ])->update([
+            'status' => 'PA'
+        ]);
+
+        $this->repositoryPedido->where([
+            'id' => $idPedido
+        ])->update([
+            'status' => 'PA'
+        ]);
+
+        return redirect()->route('carrinho.compras')->with('mensagem', 'Compra efetuada com sucesso!.');
     }
 
 
@@ -200,52 +194,93 @@ class CarrinhoController extends Controller
 
             $mensagem = 'Produto cancelado com sucesso!.';
         }
-
+        return redirect()->route('carrinho.compras')->with('mensagem',$mensagem);
     }
 
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function desconto(Request $request)
     {
-        //
-    }
+        $idPedido = $request->input('pedido_id');
+        $cupom = $request->input('cupom');
+        $idUsuario = Auth::id();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+        if(empty($cupom))
+        {
+            return redirect()->route('carrinho.index')->with('mensagem','Cupom inválido');
+        }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+        $cupom = $this->repositoryCupom->where([
+            'localizador' => $cupom,
+            'ativo' => 'S'
+        ])->where('validade','>',date('Y-m-d H:i:s'))->first();
+        if(empty($cupom->id))
+        {
+            return redirect()->route('carrinho.index')->with('mensagem','Cupom não encontrado');
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+
+        $check_pedido = $this->repositoryPedido->where([
+            'id' => $idPedido,
+            'user_id' => $idUsuario,
+            'status' => 'RE'
+        ])->exists();
+        if(!$check_pedido){
+            return redirect()->route('carrinho.index')->with('mensagem','Pedido não encontrado');
+        }
+        
+        $itens_pedidos = $this->repositoryPedidoProduto->where([
+            'pedido_id' => $idPedido,
+            'status' => 'RE'
+        ])->get();
+
+        if(empty($itens_pedidos))
+        {
+            return redirect()->route('carrinho.index')->with('mensagem','Produto não encontrado');
+        }
+
+        $aplicou_desconto = false;
+        foreach($itens_pedidos as $itens_pedido){
+            switch($cupom->modo_desconto)
+            {
+                case 'percent':
+                $valor_desconto = ($itens_pedido->valor * $cupom->desconto) / 100;
+            break;
+            default:
+                $valor_desconto = $cupom->desconto;
+        break;        
+            }
+            $valor_desconto = ($valor_desconto > $itens_pedido->valor) ? $itens_pedido->valor : number_format($valor_desconto,2);
+            
+            switch($cupom->modo_limite){
+                case 'qnt':
+                    $qtd_pedido = $this->repositoryItensPedido->whereIn('status',['PA','RE'])->where([
+                        'cupom_desconto_id' => $cupom->id
+                    ])->count();
+                    if($qtd_pedido >= $cupom->limite){
+                        /*continue;*/
+                    }
+                break;
+                default:
+                $valor_limite_desconto = $this->repositoryItensPedido->whereIn('status',['PA','RE'])->qhere([
+                    'cupom_desconto_id' => $cupom->id
+                ])->sum('desconto');
+                if(($valor_limite_desconto + $valor_desconto) > $cupom->limite ){
+                    /*continue;*/
+                }
+                break;
+            }
+
+            $itens_pedido->cupom_desconto_id = $cupom->id;
+            $itens_pedido->desconto = $valor_desconto;
+            $itens_pedido->update();
+
+            $aplicou_desconto = true;
+        }
+
+        if($aplicou_desconto){
+            return redirect()->route('carrinho.index')->with('mensagem','Desconto aplicado com sucesso');
+        }else{
+            return redirect()->route('carrinho.index')->with('mensagem','Desconto esgotado');
+        }
+        return redirect()->route('carrinho.index');
     }
 }

@@ -19,7 +19,7 @@ class Pedido extends Model
     }
 
     //
-    public function pedido_produto_item(){
+    public function itens_pedidos_produtos(){
         return $this->hasMany('App\Models\ItensPedido');
     }
 
