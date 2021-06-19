@@ -35,6 +35,8 @@
                         <h5>{{$produto->descricao}}</h5>
                         <br>
                         <h5>{{$produto->valor}}</h5>
+                        <br>
+                        <h5><img src="{{ $produto->image }}" class="rounded-circle" width='100' height="100" /></h5>
                     </div>
                 </div>
             </div>

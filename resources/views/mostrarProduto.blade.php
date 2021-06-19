@@ -11,6 +11,7 @@
                 <th>Nome</th>
                 <th>Descrição</th>
                 <th>Valor</th>
+                <th>Imagem</th>
             </tr>
         </thead>
         <tbody>
@@ -18,6 +19,8 @@
                 <td>{{$produto->nome}}</td>
                 <td>{{$produto->descricao}}</td>
                 <td>{{$produto->valor}}</td>
+                <td><img src="{{ $produto->image }}" class="rounded-circle" width='100' height="100" /></td>
+          </tr>
             </tr>
         </tbody>
     </table>
